@@ -9,9 +9,11 @@ def analyze(csv_file):
         return None, None, "⚠️ Please upload a CSV file first!"
     
     try:
-        predictions = predict_risk(csv_file.name)
+        df = pd.read_csv(csv_file.name)
+        result_df = predict_risk(df)
+        
+        predictions = result_df.to_dict('records')
         report_path = generate_report(predictions)
-        df = pd.DataFrame(predictions)
         
         high = sum(1 for p in predictions if p['risk_level'] == 'HIGH')
         medium = sum(1 for p in predictions if p['risk_level'] == 'MEDIUM')
@@ -26,7 +28,7 @@ def analyze(csv_file):
 | 🟢 LOW     | {low} patients |
 | 👥 Total   | {len(predictions)} patients |
 """
-        return df, report_path, summary
+        return result_df, report_path, summary
         
     except Exception as e:
         return None, None, f"❌ Error: {str(e)}"
